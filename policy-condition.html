@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Lowcoder Tree Table Expand</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/antd/4.24.10/antd.min.css"
+    />
+    <style>
+      body {
+        padding: 16px;
+        font-family: Arial, sans-serif;
+      }
+      .table-container {
+        background: #fff;
+        padding: 16px;
+        border-radius: 8px;
+      }
+      .ant-table-pagination.ant-pagination {
+        margin: 24px 0;
+      }
+      .ant-table-tbody > tr:hover > td {
+        background-color: #fafafa;
+      }
+      .ant-btn-icon-only {
+        padding: 4px;
+      }
+      .ant-table-cell {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .ant-table,
+      .ant-table-cell,
+      .ant-table-thead > tr > th,
+      .ant-table-tbody > tr > td,
+      .anticon {
+        color: #334155 !important;
+        font-size: 14px !important;
+      }
+      .ant-table-thead > tr > th {
+        background: #fff !important;
+        font-weight: bold !important;
+        color: #334155 !important;
+      }
+      .custom-expand-icon {
+        margin-right: 8px;
+        cursor: pointer;
+      }
+      
+      /* Search Component Styles */
+      .filter-icon {
+        cursor: pointer;
+      }
+
+      .filter-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .filter-input {
+        flex: 1;
+        max-width: 300px;
+      }
+
+      .icon-btn {
+        border: none;
+        background: none;
+        cursor: pointer;
+      }
+
+      .action-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      .action-buttons {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .select-group {
+        display: flex;
+        gap: 16px;
+      }
+
+      .select-item {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .select-item label {
+        font-size: 12px;
+        margin-bottom: 4px;
+        color: #555;
+      }
+
+      .order-select {
+        width: 120px;
+      }
+
+      .sort-select {
+        width: 120px;
+      }
+
+      .nodes-row {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+
+      .node {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 432px;  
+        border: 1px solid #d9d9d9;
+        padding: 6px;
+        border-radius: 6px;
+        background: #fafafa;
+        flex-shrink: 0; 
+      }
+
+      .node-delete {
+        border: none !important;
+        background: transparent !important; 
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        color: #999;       
+        font-size: 16px;       
+      }
+      
+      .node-delete:hover {
+        color: #ff4d4f;       
+      }
+
+      .node-select {
+        width: 124px;
+      }
+
+      .node-operator {
+        width: 63px;
+      }
+
+      .node-value {
+        flex: 1;
+        min-width: 80px;
+      }
+      
+      .search-card {
+        margin-bottom: 16px;
+      }
+
+      .ant-table-cell .ant-space {
+        gap: 1px !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.21.4/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/antd/4.24.10/antd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ant-design-icons/5.6.1/index.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/dayjs.min.js"></script>
+
+    <script type="text/babel">
+      const { useState, useEffect, useCallback } = React;
+      const { Table, Button, Space, Input, Select, Card, Switch, message, Modal } = antd;
+      const { FormOutlined, EyeOutlined, PlusCircleOutlined, PaperClipOutlined, DownOutlined, RightOutlined, FilterOutlined, PlusOutlined, DeleteOutlined, ReloadOutlined, SearchOutlined, ExclamationCircleOutlined } = icons;
+      const scroll = { x: 1000 };
+
+      const valueTypes = { TEXT: "TEXT", PICK_LIST: "PICK_LIST", BOOLEAN: "BOOLEAN" };
+
+      const orderOptions = [
+        { label: "Create Date", value: "id" },
+        { label: "Name", value: "name" },
+        { label: "Code", value: "code" }
+      ];
+      const sortOptions = ["Ascending", "Descending"];
+
+      const SearchComponent = ({ runQuery, model, updateModel, onReload, onDeleteSelected, selectedCount, onSearch }) => {
+        const [showFilter, setShowFilter] = useState(false);
+        const [nodes, setNodes] = useState([]);
+        const [order, setOrder] = useState(orderOptions[0].value);
+        const [sort, setSort] = useState(sortOptions[0]);
+        const [searchText, setSearchText] = useState("");
+        const [isComposing, setIsComposing] = useState(false);
+        
+        const allOptions = model?.allOptions || [];
+        
+        const handleAddNode = () => {
+          if (nodes.length >= allOptions.length) return;
+          setNodes([...nodes, { field: null, operator: "=", value: "" }]);
+        };
+
+        const handleDeleteNode = (index) => {
+          const newNodes = nodes.filter((_, i) => i !== index);
+          setNodes(newNodes);
+        };
+
+        const handleUpdateNode = (index, key, val) => {
+          const newNodes = [...nodes];
+          newNodes[index][key] = val;
+          setNodes(newNodes);
+        };
+
+        const getParam = (nodesSreach, orderSearch, sortSearch) => {
+          let paramSort = ""
+          if ( sortSearch == 'Ascending' ) {
+            paramSort = "sort=" + orderSearch
+          }
+            if ( sortSearch == 'Descending' ) {
+            paramSort = "sort=-" + orderSearch
+          }
+          const res = nodesSreach
+        .filter(f => f.field)
+        .map(f => {
+            const value = encodeURIComponent(f.value); // encode value
+            if (f.operator === "=") {
+              return `${f.field}=${value}`;
+            }
+            return `${f.field}.${f.operator}=${value}`;
+        })
+          
+        let resString = "";
+        if(res.length > 0 ) {
+          resString = "&&" + res.join("&") +  "&" + paramSort;
+        }else {
+          resString = "&&" + paramSort;
+        }
+          
+        if (onSearch) {
+          onSearch(resString);
+        }
+        }
+
+        const availableOptions = (currentIndex) => {
+          const selectedFields = nodes
+            .map((n) => n.field)
+            .filter((f) => f !== null && f !== undefined);
+
+          return allOptions.filter(
+            (opt) =>
+              !selectedFields.includes(opt.value) ||
+              nodes[currentIndex].field === opt.value
+          );
+        };
+
+        const reloadSearch = () => {
+          setNodes([]);                          
+          setOrder(orderOptions[0].value);       
+          setSort(sortOptions[0]);               
+          setShowFilter(false);                  
+          updateModel({ uriState: "" });         
+          setSearchText('');
+          if (onReload) {
+            onReload();
+          }
+        };
+
+        const handleSearchChange = (e) => {
+          const val = e?.target?.value ?? e;
+          setSearchText(val);
+          
+          // Nếu xóa hết text thì reload lại dữ liệu gốc
+          if (!val || val.trim() === "") {
+            if (onReload) {
+              onReload();
+            }
+          }
+        };
+      
+        useEffect(() => {
+          if (isComposing) return;
+          
+          if (searchText.trim()) {
+            const handler = setTimeout(() => {
+              const searchString = `&name.like.or=${encodeURIComponent(searchText)}&code.like.or=${encodeURIComponent(searchText)}`;
+              onSearch && onSearch(searchString);
+            }, 300);
+            
+            return () => clearTimeout(handler);
+          }
+        }, [searchText, isComposing]);
+
+        return (
+          <Card className="search-card">
+            <div className="filter-container">
+              <Input
+                className="filter-input"
+                placeholder="Search name..."
+                onChange={handleSearchChange}
+                onCompositionStart={() => setIsComposing(true)} 
+                onCompositionEnd={() => setIsComposing(false)} 
+                addonAfter={
+                  <FilterOutlined
+                    className="filter-icon"
+                    onClick={() => setShowFilter(!showFilter)}
+                  />
+                }
+              />
+              <Button
+                className="icon-btn"
+                icon={<PlusOutlined />}
+                onClick={() => runQuery(model.showModelAddParent)}
+              />
+              <Button
+                className="icon-btn"
+                icon={<DeleteOutlined />}
+                onClick={onDeleteSelected}
+                disabled={selectedCount === 0}
+                title={`Xóa ${selectedCount} mục đã chọn`}
+              />
+              <Button
+                className="icon-btn"
+                icon={<ReloadOutlined />}
+                onClick={reloadSearch}
+              />
+            </div>
+
+            {showFilter && (
+              <div>
+                <div className="action-row">
+                  <div className="action-buttons">
+                    <Button
+                      type="dashed"
+                      icon={<PlusOutlined />}
+                      onClick={handleAddNode}
+                    >
+                      Add action
+                    </Button>
+                    {nodes.length > 0 && (
+                      <Button
+                        type="default"
+                        icon={<SearchOutlined />}
+                        onClick={() => getParam(nodes, order , sort)}
+                      />
+                    )}
+                  </div>
+
+                  <div className="select-group">
+                    <div className="select-item">
+                      <label>Order</label>
+                      <Select
+                        className="order-select"
+                        value={order}
+                        onChange={setOrder}
+                        options={orderOptions}
+                      />
+                    </div>
+                    <div className="select-item">
+                      <label>Sort</label>
+                      <Select
+                        className="sort-select"
+                        value={sort}
+                        onChange={setSort}
+                        options={sortOptions.map((o) => ({
+                          value: o,
+                          label: o,
+                        }))}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="nodes-row">
+                  {nodes.map((node, index) => {
+                    const optConfig = allOptions.find(
+                      (o) => o.value === node.field
+                    );
+
+                    return (
+                      <div key={index} className="node">
+                        <Select
+                          className="node-select"
+                          placeholder="Chọn field"
+                          value={node.field}
+                          onChange={(val) =>
+                            handleUpdateNode(index, "field", val)
+                          }
+                          options={availableOptions(index).map((o) => ({
+                            value: o.value,
+                            label: o.label,
+                          }))}
+                        />
+                        <Select
+                          className="node-operator"
+                          value={node.operator}
+                          onChange={(val) =>
+                            handleUpdateNode(index, "operator", val)
+                          }
+                          options={optConfig?.operators || [{ value: "=", label: "=" }]}
+                        />
+
+                        {optConfig?.type === valueTypes.BOOLEAN ? (
+                          <Switch
+                            checked={node.value === true}
+                            onChange={(val) => handleUpdateNode(index, "value", val)}
+                          />
+                        ) : optConfig?.type === valueTypes.PICK_LIST ? (
+                          <Select
+                            className="node-value"
+                            value={node.value}
+                            onChange={(val) =>
+                              handleUpdateNode(index, "value", val)
+                            }
+                            options={optConfig?.options || []}
+                          />
+                        ) : (
+                          <Input
+                            className="node-value"
+                            value={node.value}
+                            onChange={(e) =>
+                              handleUpdateNode(index, "value", e.target.value)
+                            }
+                          />
+                        )}
+                        <Button
+                          icon={<DeleteOutlined />}
+                          onClick={() => handleDeleteNode(index)}
+                          className="node-delete"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </Card>
+        );
+      };
+
+      const MyCustomComponent = ({ runQuery, model, updateModel }) => {
+        const [dataTable, setDataTable] = React.useState([]);
+        const [pagination, setPagination] = React.useState({
+          current: 1,
+          pageSize: 10,
+          total: 0
+        });
+        const [selectedRowKeys, setSelectedRowKeys] = React.useState([]);
+        
+        // Sử dụng ref để tránh tạo function mới
+        const paginationRef = React.useRef(pagination);
+        
+        // Cập nhật ref khi pagination thay đổi
+        React.useEffect(() => {
+          paginationRef.current = pagination;
+        }, [pagination]);
+
+        // Hàm fetch data với offset và limit - đơn giản hóa dependencies
+        const fetchRootNodes = React.useCallback(async (page = 1, pageSize = 10, searchString = "") => {
+          if (!model.authorization) {
+            return;
+          }
+          try {
+            const offset = (page - 1) * pageSize;
+            const url = `http://10.165.68.7:30216/policyCondition?offset=${offset}&limit=${pageSize}${searchString}`;
+            const response = await fetch(url, {
+              headers: {
+                Authorization: `Bearer ${model.authorization}`,
+                "Content-Type": "application/json",
+              },
+            });
+            if (!response.ok)
+              throw new Error("API error: " + response.status);
+            const data = await response.json();
+            if (Array.isArray(data)) {
+              const mapItemToTableRow = (item, idx, isRootParent = true) => ({
+                key: item.id || idx,
+                id: item.id,
+                name: item.name,
+                code: item.code,
+                description: item.description,
+                "@type": item["@type"],
+                "@baseType": item["@baseType"],
+                href: item.href,
+                validFor: item.validFor,
+                lifecycleStatus: item.lifecycleStatus,
+                version: item.version,
+                isConjustiveNormalForm: item.isConjustiveNormalForm,
+                policyConditionStrategy: item.policyConditionStrategy,
+                policyConditionStatement: item.policyConditionStatement,
+                creationDate: item.creationDate,
+                "@schemaLocation": item["@schemaLocation"],
+                "@referredType": item["@referredType"],
+                // Xác định có thể expand hay không: chỉ khi @type = "PolicyConditionComposite" và có policyCondition children
+                canExpand: item["@type"] === "PolicyConditionComposite" && item.policyCondition && item.policyCondition.length > 0,
+                // Map policyCondition từ policyCondition array (chỉ khi @type = "PolicyConditionComposite")
+                policyCondition: item["@type"] === "PolicyConditionComposite" && item.policyCondition && item.policyCondition.length > 0 
+                  ? item.policyCondition.map((child, childIdx) => mapItemToTableRow(child, childIdx, false))
+                  : undefined,
+                // Thêm thuộc tính để xác định bản ghi cha - Dùng tên khác để tránh conflict với API data
+                _isRootLevel: isRootParent,
+              });
+              
+              const mapped = data.map(mapItemToTableRow);
+              setDataTable(mapped);
+              // Cập nhật thông tin phân trang
+              const newPagination = {
+                current: page,
+                pageSize: pageSize,
+                total: model.total || data.length
+              };
+              setPagination(newPagination);
+              paginationRef.current = newPagination;
+            }
+          } catch (err) {
+            // bỏ qua lỗi
+          }
+        }, [model.authorization]);
+
+        // Hàm xử lý search với filter string - sử dụng ref để tránh dependency
+        const handleSearch = React.useCallback((searchString) => {
+          fetchRootNodes(1, paginationRef.current.pageSize, searchString);
+        }, [fetchRootNodes]);
+
+        // Lấy danh sách root node từ API khi component mount
+        React.useEffect(() => {
+          fetchRootNodes();
+        }, [model.authorization]);
+
+        // Theo dõi model.countLoad để reload lại table khi cần
+        React.useEffect(() => {
+          if (model.countLoad > 0) {
+            fetchRootNodes(pagination.current, pagination.pageSize);
+          }
+        }, [model.countLoad]);
+
+        const [parentId, setParentId] = React.useState("");
+
+        const columns = [
+          {
+            title: "Selected",
+            dataIndex: "selected",
+            key: "selected",
+            width: 100,
+            render: (val, record) => (
+              <input 
+                type="checkbox" 
+                checked={selectedRowKeys.includes(record.id)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedRowKeys([...selectedRowKeys, record.id]);
+                  } else {
+                    setSelectedRowKeys(selectedRowKeys.filter(key => key !== record.id));
+                  }
+                }}
+              />
+            ),
+          },
+          {
+            title: "Name",
+            dataIndex: "name",
+            key: "name",
+            width: 200,
+            ellipsis: true,
+          },
+          { title: "Code", dataIndex: "code", key: "code", width: 150 },
+          {
+            title: "Type",
+            key: "type",
+            width: 150,
+            render: (record) => {
+              const type = record["@type"];
+              return type === "PolicyConditionComposite" ? "Composite" : "Atomic";
+            }
+          },
+          {
+            title: "Description",
+            dataIndex: "description",
+            key: "description",
+            width: 200,
+            ellipsis: true,
+          },
+          {
+            title: "Action",
+            key: "action",
+            width: 164,
+            align: "left",
+            fixed: "right",
+            render: (_, record) => (
+              <Space size="small">
+                {record._isRootLevel && (
+                  <Button
+                    type="link"
+                    icon={<EyeOutlined />}
+                    title="Xem"
+                    onClick={() => handleGraph(record)}
+                  />
+                )}
+                {record["@type"] === "PolicyConditionComposite" && (
+                  <Button
+                    type="link"
+                    icon={<PlusCircleOutlined />}
+                    title="Thêm mới"
+                    onClick={() => handleAdd(record)}
+                  />
+                )}
+                {record["@type"] === "PolicyConditionComposite" && (
+                  <Button
+                    type="link"
+                    icon={<PaperClipOutlined />}
+                    title="Select"
+                    onClick={() => handleAddSelect(record)}
+                  />
+                )}
+                <Button
+                  type="link"
+                  icon={<FormOutlined />}
+                  title="Sửa"
+                  onClick={() => handleEdit(record)}
+                />
+                <Button
+                  type="link"
+                  danger
+                  icon={<icons.DeleteOutlined />}
+                  title="Xóa"
+                  onClick={() => handleDelete(record)}
+                />
+              </Space>
+            ),
+          },
+        ];
+
+        // Function để tìm root parent của một record
+        const findRootParent = (record) => {
+          // Tìm trong dataTable để lấy root parent
+          const findRoot = (data) => {
+            for (const item of data) {
+              // Nếu record chính là root level
+              if (item.id === record.id) {
+                return item;
+              }
+              // Tìm trong policyCondition nếu có
+              if (item.policyCondition) {
+                const found = findInPolicyCondition(item.policyCondition, record.id);
+                if (found) {
+                  return item; // Trả về root parent
+                }
+              }
+            }
+            return null;
+          };
+          
+          const findInPolicyCondition = (policyCondition, targetId) => {
+            for (const child of policyCondition) {
+              if (child.id === targetId) {
+                return child;
+              }
+              if (child.policyCondition) {
+                const found = findInPolicyCondition(child.policyCondition, targetId);
+                if (found) return found;
+              }
+            }
+            return null;
+          };
+          
+          return findRoot(dataTable);
+        };
+
+        function uuidv4() {
+          return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+          });
+        }
+
+        // Helper function để map children theo structure cho graph
+        const getChildren = (condition) => {
+          if (!condition || !condition.policyCondition || !condition.policyCondition.length) {
+            return [];
+          }
+          
+          return condition.policyCondition.map((item) => {
+            return {
+              ...item,
+              parentId: condition.id,
+              parentKey: condition.uniqueKey,
+              children: getChildren(item) // Recursive mapping
+            };
+          });
+        };
+
+        // Map condition data để phù hợp với ViewDetailGraph component  
+        const mapConditionForGraph = (condition) => {
+          // Add uniqueKey cho mỗi condition
+          const uniqueKey = condition.uniqueKey || uuidv4();
+          
+          const mapped = {
+            ...condition, // Preserve tất cả original fields
+            
+            // Đảm bảo có các fields cần thiết
+            id: condition.id,
+            name: condition.name || condition.code || 'Unnamed Condition',
+            code: condition.code || '',
+            description: condition.description || '',
+            
+            // Strategy mapping
+            policyConditionStrategy: condition.policyConditionStrategy || 'allOf',
+            isConjustiveNormalForm: condition.isConjustiveNormalForm !== undefined ? condition.isConjustiveNormalForm : true,
+            
+            // Type mapping - giữ nguyên hoặc detect
+            '@type': condition['@type'] || (condition.policyCondition && condition.policyCondition.length > 0 ? 'PolicyConditionComposite' : 'PolicyConditionAtomic'),
+            
+            // Map children theo structure tham khảo - QUAN TRỌNG!
+            children: getChildren(condition),
+            
+            // Preserve policyCondition và policyConditionStatement
+            policyCondition: condition.policyCondition || [],
+            policyConditionStatement: condition.policyConditionStatement || [],
+            
+            // Parent info
+            parentId: condition.parentId || null,
+            parentKey: condition.parentKey || null,
+            uniqueKey: uniqueKey
+          };
+          
+          return mapped;
+        };
+
+        const handleAdd = (record) => {
+          // Tìm root parent của record hiện tại
+          const rootParent = findRootParent(record);
+          
+          const rowDataSelect = rootParent ? {
+            ...rootParent,
+            id_bioParent: record.id,
+            id_new: uuidv4(),
+          } : 
+          { 
+            ...record,
+            id_new: uuidv4(),
+          };
+
+          // Truyền root parent thay vì record hiện tại
+          updateModel({ rowDataSelect: rowDataSelect });
+          runQuery(model.preAddChild);
+        };
+
+        const handleGraph = (record) => {
+          // Map dữ liệu với structure phù hợp cho graph
+          const mappedData = mapConditionForGraph(record);
+
+          console.log("View graph for:", mappedData);
+          updateModel({ rowDataSelect: mappedData });
+          runQuery(model.getGraphView);
+        };
+
+        const handleAddSelect = (record) => {
+          // Tìm root parent của record hiện tại
+          const rootParent = findRootParent(record);
+          
+          const rowDataSelect = rootParent ? {
+            ...rootParent,
+            id_bioParent: record.id,
+            id_new: uuidv4(),
+          } : 
+          { 
+            ...record,
+            id_new: uuidv4(),
+          };
+
+          // Truyền root parent thay vì record hiện tại
+          updateModel({ rowDataSelect: rowDataSelect });
+          runQuery(model.preAddChildSelect);
+        };
+
+        const handleDelete = (record) => {
+          if (!model.authorization) {
+            message.error('Không có quyền truy cập');
+            return;
+          }
+          
+          // Hiển thị modal confirmation
+          Modal.confirm({
+            title: 'Xác nhận xóa',
+            icon: <ExclamationCircleOutlined />,
+            content: `Bạn có chắc chắn muốn xóa "${record.name}"?`,
+            okText: 'Xóa',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            onOk: async () => {
+              // Xóa một record cụ thể
+              if (record && record.id) {
+                try {
+                  const response = await fetch(`http://10.165.68.7:30216/policyCondition/${record.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                      Authorization: `Bearer ${model.authorization}`,
+                      "Content-Type": "application/json",
+                    },
+                  });
+                  if (response.ok) {
+                    // Reload lại dữ liệu sau khi xóa thành công
+                    fetchRootNodes(pagination.current, pagination.pageSize);
+                    message.success({
+                      content: `Đã xóa thành công "${record.name}"`,
+                      duration: 3,
+                      style: { color: '#52c41a' }
+                    });
+                  } else {
+                    message.error({
+                      content: `Xóa thất bại: ${response.status} - Không thể xóa bản ghi này.`,
+                      duration: 3,
+                      style: { color: '#ff4d4f' }
+                    });
+                  }
+                } catch (err) {
+                  message.error({
+                    content: 'Có lỗi xảy ra khi xóa dữ liệu',
+                    duration: 3,
+                    style: { color: '#ff4d4f' }
+                  });
+                  console.error("Delete error:", err);
+                }
+              }
+            },
+          });
+        };
+
+        // Hàm xóa hàng loạt các row đã chọn
+        const handleDeleteSelected = () => {
+          if (!model.authorization) {
+            message.error('Không có quyền truy cập');
+            return;
+          }
+          
+          if (selectedRowKeys.length === 0) {
+            message.warning('Vui lòng chọn ít nhất một mục để xóa');
+            return;
+          }
+          
+          // Hiển thị modal confirmation cho xóa hàng loạt
+          Modal.confirm({
+            title: 'Xác nhận xóa hàng loạt',
+            icon: <ExclamationCircleOutlined />,
+            content: `Bạn có chắc chắn muốn xóa ${selectedRowKeys.length} mục đã chọn?`,
+            okText: 'Xóa tất cả',
+            okType: 'danger',
+            cancelText: 'Hủy',
+            onOk: async () => {
+              try {
+                message.loading(`Đang xóa ${selectedRowKeys.length} mục...`, 0);
+                
+                const deletePromises = selectedRowKeys.map(id => 
+                  fetch(`http://10.165.68.7:30216/policyCondition/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                      Authorization: `Bearer ${model.authorization}`,
+                      "Content-Type": "application/json",
+                    },
+                  })
+                );
+                
+                const results = await Promise.allSettled(deletePromises);
+                
+                // Đếm số lượng thành công và thất bại
+                const successCount = results.filter(result => 
+                  result.status === 'fulfilled' && result.value.ok
+                ).length;
+                const failedCount = selectedRowKeys.length - successCount;
+                
+                message.destroy();
+                
+            if (failedCount === 0) {
+              message.success({
+                content: `Đã xóa thành công ${successCount} mục`,
+                duration: 3,
+                style: { color: '#52c41a' }
+              });
+            } else if (successCount === 0) {
+              message.error({
+                content: `Xóa thất bại tất cả ${failedCount} mục`,
+                duration: 3,
+                style: { color: '#ff4d4f' }
+              });
+            } else {
+              message.warning({
+                content: `Xóa thành công ${successCount} mục, thất bại ${failedCount} mục`,
+                duration: 3,
+                style: { color: '#faad14' }
+              });
+            }
+            // Reset selected rows và reload dữ liệu
+                setSelectedRowKeys([]);
+                fetchRootNodes(pagination.current, pagination.pageSize);
+              } catch (err) {
+                message.destroy();
+                message.error({
+                  content: 'Có lỗi xảy ra khi xóa dữ liệu',
+                  duration: 3,
+                  style: { color: '#ff4d4f' }
+                });
+                console.error("Bulk delete error:", err);
+              }
+            },
+          });
+        };
+
+        const handleEdit = (record) => {
+          updateModel({ rowDataSelect: record });
+          runQuery(model.getForm);
+        };
+
+        const onExpand = (expanded, record) => {
+          // Không cần call API vì children đã có sẵn trong data từ trường policyAction
+          // Chỉ cần log để debug nếu cần
+          console.log("Expand/Collapse:", expanded, record);
+        };
+
+        const onPageChange = (page, pageSize) => {
+          fetchRootNodes(page, pageSize);
+        };
+
+        const paginationConfig = {
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
+          onChange: onPageChange,
+          onShowSizeChange: onPageChange,
+          pageSizeOptions: ["10", "20", "50"],
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} mục`,
+        };
+
+        return (
+          <div className="table-container">
+            <SearchComponent 
+              runQuery={runQuery} 
+              model={model} 
+              updateModel={updateModel} 
+              onReload={() => fetchRootNodes(1, pagination.pageSize)}
+              onDeleteSelected={handleDeleteSelected}
+              selectedCount={selectedRowKeys.length}
+              onSearch={handleSearch}
+            />
+            <Table
+              columns={columns}
+              dataSource={dataTable}
+              pagination={paginationConfig}
+              onExpand={onExpand}
+              rowExpandable={(record) => record.canExpand === true}
+              defaultExpandAllRows={false}
+              childrenColumnName="policyCondition"
+              expandIcon={({ expanded, onExpand, record }) =>
+                record.canExpand === true ? (
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={
+                      expanded ? (
+                        <icons.DownOutlined />
+                      ) : (
+                        <icons.RightOutlined />
+                      )
+                    }
+                    onClick={(e) => onExpand(record, e)}
+                    className="custom-expand-icon"
+                  />
+                ) : null
+              }
+              scroll={scroll}
+              size="middle"
+              rowKey="id"
+            />
+          </div>
+        );
+      };
+
+      const ConnectedComponent = Lowcoder.connect(MyCustomComponent);
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<ConnectedComponent />);
+    </script>
+  </body>
+</html>
