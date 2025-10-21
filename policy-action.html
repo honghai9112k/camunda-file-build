@@ -213,34 +213,17 @@
         };
 
         const getParam = (nodesSreach, orderSearch, sortSearch) => {
-          let paramSort = ""
-          if ( sortSearch == 'Ascending' ) {
-            paramSort = "sort=" + orderSearch
-          }
-            if ( sortSearch == 'Descending' ) {
-            paramSort = "sort=-" + orderSearch
-          }
+          const paramSort = sortSearch === "Ascending" ? `sort=${orderSearch}` : `sort=-${orderSearch}`;
           const res = nodesSreach
-        .filter(f => f.field)
-        .map(f => {
-            const value = encodeURIComponent(f.value); // encode value
-            if (f.operator === "=") {
-              return `${f.field}=${value}`;
-            }
-            return `${f.field}.${f.operator}=${value}`;
-        })
+            .filter((f) => f.field)
+            .map((f) => {
+              const value = encodeURIComponent(f.value);
+              return f.operator === "=" ? `${f.field}=${value}` : `${f.field}.${f.operator}=${value}`;
+            });
           
-        let resString = "";
-        if(res.length > 0 ) {
-          resString = "&&" + res.join("&") +  "&" + paramSort;
-        }else {
-          resString = "&&" + paramSort;
-        }
-          
-        if (onSearch) {
-          onSearch(resString);
-        }
-        }
+          const resString = res.length > 0 ? `&&${res.join("&")}&${paramSort}` : `&&${paramSort}`;
+          onSearch && onSearch(resString);
+        };
 
         const availableOptions = (currentIndex) => {
           const selectedFields = nodes
@@ -269,26 +252,18 @@
         const handleSearchChange = (e) => {
           const val = e?.target?.value ?? e;
           setSearchText(val);
-          
-          // Nếu xóa hết text thì reload lại dữ liệu gốc
-          if (!val || val.trim() === "") {
-            if (onReload) {
-              onReload();
-            }
-          }
+          if (!val?.trim()) onReload?.();
         };
       
         useEffect(() => {
-          if (isComposing) return;
+          if (isComposing || !searchText.trim()) return;
           
-          if (searchText.trim()) {
-            const handler = setTimeout(() => {
-              const searchString = `&name.like.or=${encodeURIComponent(searchText)}&code.like.or=${encodeURIComponent(searchText)}`;
-              onSearch && onSearch(searchString);
-            }, 300);
-            
-            return () => clearTimeout(handler);
-          }
+          const handler = setTimeout(() => {
+            const searchString = `&name.like.or=${encodeURIComponent(searchText)}&code.like.or=${encodeURIComponent(searchText)}`;
+            onSearch?.(searchString);
+          }, 300);
+          
+          return () => clearTimeout(handler);
         }, [searchText, isComposing]);
 
         return (
@@ -461,7 +436,7 @@
             return;
           }
           try {
-            const offset = (page - 1) * pageSize;
+            const offset = page - 1;
             const url = `http://10.165.68.7:30216/policyAction?offset=${offset}&limit=${pageSize}${searchString}`;
             const response = await fetch(url, {
               headers: {
@@ -471,6 +446,11 @@
             });
             if (!response.ok)
               throw new Error("API error: " + response.status);
+            
+            // Lấy total count từ header
+            const totalCount = response.headers.get('X-Total-Count');
+            const total = totalCount ? parseInt(totalCount, 10) : 0;
+            
             const data = await response.json();
             if (Array.isArray(data)) {
               const mapItemToTableRow = (item, idx) => ({
@@ -490,11 +470,10 @@
               
               const mapped = data.map(mapItemToTableRow);
               setDataTable(mapped);
-              // Cập nhật thông tin phân trang
               const newPagination = {
                 current: page,
                 pageSize: pageSize,
-                total: model.total || data.length
+                total: total,
               };
               setPagination(newPagination);
               paginationRef.current = newPagination;
@@ -717,13 +696,9 @@
           runQuery(model.getGraph);
         };
 
-        const handleDelete = (record) => {
-          if (!model.authorization) {
-            message.error('Không có quyền truy cập');
-            return;
-          }
-          
-          // Hiển thị modal confirmation
+        const handleDelete = async (record) => {
+          if (!model.authorization) return message.error('Không có quyền truy cập');
+
           Modal.confirm({
             title: 'Xác nhận xóa',
             icon: <ExclamationCircleOutlined />,
@@ -732,8 +707,7 @@
             okType: 'danger',
             cancelText: 'Hủy',
             onOk: async () => {
-              // Xóa một record cụ thể
-              if (record && record.id) {
+              if (record?.id) {
                 try {
                   const response = await fetch(`http://10.165.68.7:30216/policyAction/${record.id}`, {
                     method: 'DELETE',
@@ -742,28 +716,16 @@
                       "Content-Type": "application/json",
                     },
                   });
+                  
                   if (response.ok) {
-                    // Reload lại dữ liệu sau khi xóa thành công
                     fetchRootNodes(pagination.current, pagination.pageSize);
-                    message.success({
-                      content: `Đã xóa thành công "${record.name}"`,
-                      duration: 3,
-                      style: { color: '#52c41a' }
-                    });
+                    message.success(`Đã xóa thành công "${record.name}"`);
                     console.log("Deleted record:", record.id);
                   } else {
-                    message.error({
-                      content: `Xóa thất bại: ${response.status} - Không thể xóa bản ghi này.`,
-                      duration: 3,
-                      style: { color: '#ff4d4f' }
-                    });
+                    message.error(`Xóa thất bại: ${response.status} - Không thể xóa bản ghi này.`);
                   }
                 } catch (err) {
-                  message.error({
-                    content: 'Có lỗi xảy ra khi xóa dữ liệu',
-                    duration: 3,
-                    style: { color: '#ff4d4f' }
-                  });
+                  message.error('Có lỗi xảy ra khi xóa dữ liệu');
                   console.error("Delete error:", err);
                 }
               }
@@ -771,19 +733,10 @@
           });
         };
 
-        // Hàm xóa hàng loạt các row đã chọn
-        const handleDeleteSelected = () => {
-          if (!model.authorization) {
-            message.error('Không có quyền truy cập');
-            return;
-          }
-          
-          if (selectedRowKeys.length === 0) {
-            message.warning('Vui lòng chọn ít nhất một mục để xóa');
-            return;
-          }
-          
-          // Hiển thị modal confirmation cho xóa hàng loạt
+        const handleDeleteSelected = async () => {
+          if (!model.authorization) return message.error('Không có quyền truy cập');
+          if (selectedRowKeys.length === 0) return message.warning('Vui lòng chọn ít nhất một mục để xóa');
+
           Modal.confirm({
             title: 'Xác nhận xóa hàng loạt',
             icon: <ExclamationCircleOutlined />,
@@ -794,57 +747,38 @@
             onOk: async () => {
               try {
                 message.loading(`Đang xóa ${selectedRowKeys.length} mục...`, 0);
-                
-                const deletePromises = selectedRowKeys.map(id => 
-                  fetch(`http://10.165.68.7:30216/policyAction/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                      Authorization: `Bearer ${model.authorization}`,
-                      "Content-Type": "application/json",
-                    },
-                  })
+
+                const results = await Promise.allSettled(
+                  selectedRowKeys.map((id) =>
+                    fetch(`http://10.165.68.7:30216/policyAction/${id}`, {
+                      method: 'DELETE',
+                      headers: {
+                        Authorization: `Bearer ${model.authorization}`,
+                        "Content-Type": "application/json",
+                      },
+                    })
+                  )
                 );
-                
-                const results = await Promise.allSettled(deletePromises);
-                
-                // Đếm số lượng thành công và thất bại
-                const successCount = results.filter(result => 
-                  result.status === 'fulfilled' && result.value.ok
-                ).length;
+
+                const successCount = results.filter((r) => r.status === 'fulfilled' && r.value.ok).length;
                 const failedCount = selectedRowKeys.length - successCount;
-                
+
                 message.destroy();
                 
-            if (failedCount === 0) {
-              message.success({
-                content: `Đã xóa thành công ${successCount} mục`,
-                duration: 3,
-                style: { color: '#52c41a' }
-              });
-            } else if (successCount === 0) {
-              message.error({
-                content: `Xóa thất bại tất cả ${failedCount} mục`,
-                duration: 3,
-                style: { color: '#ff4d4f' }
-              });
-            } else {
-              message.warning({
-                content: `Xóa thành công ${successCount} mục, thất bại ${failedCount} mục`,
-                duration: 3,
-                style: { color: '#faad14' }
-              });
-            }
-            // Reset selected rows và reload dữ liệu
+                if (failedCount === 0) {
+                  message.success(`Đã xóa thành công ${successCount} mục`);
+                } else if (successCount === 0) {
+                  message.error(`Xóa thất bại tất cả ${failedCount} mục`);
+                } else {
+                  message.warning(`Xóa thành công ${successCount} mục, thất bại ${failedCount} mục`);
+                }
+                
                 setSelectedRowKeys([]);
                 fetchRootNodes(pagination.current, pagination.pageSize);
                 console.log("Deleted selected records:", selectedRowKeys);
               } catch (err) {
                 message.destroy();
-                message.error({
-                  content: 'Có lỗi xảy ra khi xóa dữ liệu',
-                  duration: 3,
-                  style: { color: '#ff4d4f' }
-                });
+                message.error('Có lỗi xảy ra khi xóa dữ liệu');
                 console.error("Bulk delete error:", err);
               }
             },
@@ -874,7 +808,6 @@
           onShowSizeChange: onPageChange,
           pageSizeOptions: ["10", "20", "50"],
           showSizeChanger: true,
-          showQuickJumper: true,
           showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} mục`,
         };
 
