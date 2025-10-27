@@ -114,36 +114,42 @@
               "ctlType": "SELECT-LIST",
               "dataType": "STRING",
               "isDisabled": true,
+              "validateRules": [
+                "REQUIRED"
+              ],
               "extInfo": [
                 {
-                  "label": "Automic",
-                  "value": "automic"
+                  "label": "Atomic",
+                  "value": "Atomic"
                 },
                 {
                   "label": "Composite",
-                  "value": "composite"
+                  "value": "Composite"
                 }
               ]
             },
             {
               "id": "8",
-              "name": "atomicType",
+              "name": "@type",
               "title": "Atomic Type",
               "ctlType": "SELECT-LIST",
               "dataType": "STRING",
-              "isDisabled": true,
+              "isDisabled": false,
               "showWhen": {
                 "field": "type",
-                "values": "Automic"
+                "values": "Atomic"
               },
+              "validateRules": [
+                "REQUIRED"
+              ],
               "extInfo": [
                 {
-                  "label": "Operation",
-                  "value": "operation"
+                  "label": "Promotion",
+                  "value": "PolicyActionPromotion"
                 },
                 {
-                  "label": "Promotion",
-                  "value": "promotion"
+                  "label": "Operation",
+                  "value": "PolicyActionOperation"
                 }
               ]
             }
@@ -244,12 +250,11 @@
       "id": "2",
       "code": "Condition",
       "name": "Condition",
-      "icon": "pi pi-arrow-right-arrow-left",
+      "icon": "pi pi-flag",
       "pageType": "SearchBySelectList",
-      "attrName": "policyAction",
-      "attrType": "policyAction",
+      "attrName": "actionCondition",
+      "attrType": "actionCondition",
       "autoCallApi": true,
-      "selectMultiple": false,
       "filter": [
         {
           "name": "name",
@@ -294,6 +299,328 @@
       ],
       "lastModified": {
         "$date": "2025-09-10T15:20:38.070Z"
+      }
+    },
+    {
+      "id": "3",
+      "name": "Action",
+      "icon": "pi pi-chevron-right",
+      "attrName": "actionValue",
+      "attrType": "",
+      "pageType": "Property",
+      "showWhen": {
+        "field": "type",
+        "values": "Atomic"
+      },
+      "groups": [
+        {
+          "id": "1",
+          "name": "Action",
+          "layoutType": "I",
+          "hideTitle": false,
+          "properties": [
+            {
+              "id": "1",
+              "name": "operation",
+              "title": "Operation",
+              "ctlType": "SELECT-LIST",
+              "dataType": "STRING",
+              "isDisabled": false,
+              "validateRules": [
+                "REQUIRED"
+              ],
+              "extInfo": [
+                {
+                  "label": "Add",
+                  "value": "add"
+                },
+                {
+                  "label": "Remove",
+                  "value": "Remove"
+                },
+                {
+                  "label": "Replace",
+                  "value": "Replace"
+                }
+              ]
+            },
+            {
+              "id": "2",
+              "name": "filter",
+              "title": "Filter",
+              "ctlType": "TEXTBOX",
+              "dataType": "STRING",
+              "items": [],
+              "isDisabled": false,
+              "extInfo": ""
+            },
+            {
+              "id": "3",
+              "name": "fields",
+              "title": "Field",
+              "ctlType": "TEXTBOX",
+              "dataType": "STRING",
+              "items": [],
+              "isDisabled": false,
+              "extInfo": ""
+            },
+            {
+              "id": "4",
+              "name": "path",
+              "title": "Path",
+              "ctlType": "TEXTBOX",
+              "dataType": "STRING",
+              "items": [],
+              "isDisabled": false,
+              "extInfo": ""
+            },
+            {
+              "id": "5",
+              "name": "dataType",
+              "title": "Data Type",
+              "ctlType": "SELECT-LIST",
+              "dataType": "STRING",
+              "isDisabled": false,
+              "validateRules": [
+                "REQUIRED"
+              ],
+              "extInfo": [
+                {
+                  "label": "String",
+                  "value": "String"
+                },
+                {
+                  "label": "Number",
+                  "value": "Number"
+                },
+                {
+                  "label": "Object",
+                  "value": "Object"
+                }
+              ]
+            },
+            {
+              "id": "6",
+              "name": "value",
+              "title": "Value",
+              "ctlType": "TEXTBOX",
+              "dataType": "STRING",
+              "isDisabled": false,
+              "extInfo": "",
+              "validateRules": [
+                "REQUIRED"
+              ],
+              "showWhen": {
+                "field": "actionValue.dataType",
+                "values": "String"
+              }
+            },
+            {
+              "id": "7",
+              "name": "value",
+              "title": "Value",
+              "ctlType": "TEXTBOX",
+              "dataType": "STRING",
+              "items": [],
+              "isDisabled": false,
+              "extInfo": "",
+              "validateRules": [
+                "REQUIRED"
+              ],
+              "showWhen": {
+                "field": "actionValue.dataType",
+                "values": "Number"
+              }
+            },
+            {
+              "id": "8",
+              "code": "selectLov",
+              "name": "productOfferingPrice",
+              "title": "Product Offering Price",
+              "dataType": "STRING",
+              "ctlType": "SELECT-LOV",
+              "validateRules": [
+                "REQUIRED"
+              ],
+              "showWhen": {
+                "field": "actionValue.dataType",
+                "values": "Object"
+              },
+              "extInfo": {
+                "uri": "http://10.165.68.7:30216/productOfferingPrice?fields=id,name,@type,@baseType,href,description,version,lifecycleStatus,isBundle,code,isRoot,isLeaf&lifecycleStatus=Active&offset=0&limit=10",
+                "labelField": "name",
+                "valueField": "id"
+              }
+            }
+          ]
+        }
+      ],
+      "filter": [],
+      "apiList": [
+        {
+          "id": "",
+          "name": "close",
+          "param": "object",
+          "description": "Cancel"
+        },
+        {
+          "id": "actionValue",
+          "name": "actionValue",
+          "uri": "/policyAction",
+          "param": "object",
+          "description": "Save"
+        }
+      ],
+      "listView": [],
+      "ctlButtons": []
+    },
+    {
+      "id": "4",
+      "name": "Note",
+      "icon": "pi pi-list",
+      "attrName": "note",
+      "attrType": "",
+      "pageType": "EPC",
+      "groups": [],
+      "filter": [
+        {
+          "name": "name",
+          "title": "Tìm kiếm",
+          "oprType": "like",
+          "dataType": "STRING",
+          "ctlType": "TEXTBOX"
+        }
+      ],
+      "apiList": [],
+      "listView": [
+        {
+          "name": "name",
+          "title": "Tên",
+          "dataType": "STRING"
+        },
+        {
+          "name": "note",
+          "title": "Note",
+          "dataType": "STRING"
+        },
+        {
+          "name": "date",
+          "title": "Date",
+          "dataType": "DATE"
+        }
+      ],
+      "ctlButtons": [],
+      "crudConfig": {
+        "addConfig": {
+          "title": "",
+          "id": "notePolicyAction",
+          "code": "attributes",
+          "formType": "Property",
+          "status": "ACTIVE",
+          "hiddenTab": true,
+          "pages": [
+            {
+              "id": "1",
+              "code": "",
+              "name": "",
+              "icon": "pi pi-file",
+              "pageType": "Property",
+              "attrName": "",
+              "attrType": "",
+              "groups": [
+                {
+                  "id": "1",
+                  "code": "General",
+                  "name": "General",
+                  "layoutType": "I",
+                  "hideTitle": true,
+                  "properties": [
+                    {
+                      "id": "1",
+                      "name": "author",
+                      "title": "Author",
+                      "dataType": "STRING",
+                      "ctlType": "TEXTBOX",
+                      "validateRules": [
+                        "REQUIRED"
+                      ],
+                      "extInfo": "",
+                      "isDisabled": true,
+                      "defaultValue": "ODA superadmin"
+                    },
+                    {
+                      "id": "2",
+                      "name": "note",
+                      "title": "Note",
+                      "ctlType": "TEXTAREA",
+                      "dataType": "STRING",
+                      "items": [],
+                      "isDisabled": false,
+                      "extInfo": ""
+                    }
+                  ]
+                }
+              ],
+              "apiList": []
+            }
+          ]
+        },
+        "editConfig": {
+          "title": "",
+          "id": "notePolicyAction",
+          "code": "attributes",
+          "formType": "Property",
+          "status": "ACTIVE",
+          "hiddenTab": true,
+          "pages": [
+            {
+              "id": "1",
+              "code": "",
+              "name": "",
+              "icon": "pi pi-file",
+              "pageType": "Property",
+              "attrName": "",
+              "attrType": "",
+              "groups": [
+                {
+                  "id": "1",
+                  "code": "General",
+                  "name": "General",
+                  "layoutType": "I",
+                  "hideTitle": true,
+                  "properties": [
+                    {
+                      "id": "1",
+                      "name": "author",
+                      "title": "Author",
+                      "dataType": "STRING",
+                      "ctlType": "TEXTBOX",
+                      "validateRules": [
+                        "REQUIRED"
+                      ],
+                      "extInfo": "",
+                      "isDisabled": true
+                    },
+                    {
+                      "id": "2",
+                      "name": "note",
+                      "title": "Note",
+                      "ctlType": "TEXTAREA",
+                      "dataType": "STRING",
+                      "items": [],
+                      "isDisabled": false,
+                      "extInfo": "",
+                      "validateRules": [
+                        "REQUIRED"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "apiList": []
+            }
+          ]
+        }
       }
     }
   ],
