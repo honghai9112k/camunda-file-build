@@ -1,0 +1,456 @@
+{
+  "title": "PolicyEvent",
+  "code": "PolicyEvent",
+  "status": "Active",
+  "formType": "Property",
+  "pages": [
+    {
+      "id": "1",
+      "name": "General",
+      "icon": "pi pi-info-circle",
+      "attrName": "",
+      "attrType": "",
+      "pageType": "Property",
+      "groups": [
+        {
+          "id": "1",
+          "name": "General",
+          "layoutType": "I",
+          "hideTitle": false,
+          "properties": [
+            {
+              "id": "1",
+              "name": "name",
+              "title": "Name",
+              "ctlType": "TEXTBOX",
+              "dataType": "STRING",
+              "items": [],
+              "validateRules": [
+                "REQUIRED"
+              ],
+              "isDisabled": false,
+              "extInfo": ""
+            },
+            {
+              "id": "2",
+              "name": "code",
+              "title": "Code",
+              "ctlType": "TEXTBOX",
+              "dataType": "STRING",
+              "items": [],
+              "validateRules": [
+                "REQUIRED"
+              ],
+              "isDisabled": false,
+              "extInfo": ""
+            },
+            {
+              "id": "3",
+              "name": "description",
+              "title": "Description",
+              "ctlType": "TEXTAREA",
+              "dataType": "STRING",
+              "items": [],
+              "isDisabled": false,
+              "extInfo": "",
+              "display": "column"
+            },
+            {
+              "id": "5",
+              "name": "executionStrategy",
+              "title": "Execution Strategy",
+              "ctlType": "SELECT-LIST",
+              "dataType": "STRING",
+              "isDisabled": false,
+              "extInfo": [
+                {
+                  "label": "Any of",
+                  "value": "anyOf"
+                },
+                {
+                  "label": "None of",
+                  "value": "noneOf"
+                },
+                {
+                  "label": "All of",
+                  "value": "allOf"
+                },
+                {
+                  "label": "One of",
+                  "value": "oneOf"
+                }
+              ]
+            },
+            {
+              "id": "4",
+              "name": "isConjustiveNormalForm",
+              "title": "Is Conjustive Normal Form",
+              "ctlType": "SWITCH-BOX",
+              "dataType": "STRING",
+              "items": [],
+              "extInfo": ""
+            },
+            {
+              "id": "5",
+              "name": "sequencedAction",
+              "title": "Sequence Action",
+              "ctlType": "SELECT-LIST",
+              "dataType": "STRING",
+              "items": [],
+              "isDisabled": false,
+              "extInfo": [
+                {
+                  "label": "1-Mandatory",
+                  "value": 1
+                },
+                {
+                  "label": "2-Recommended",
+                  "value": 2
+                },
+                {
+                  "label": "3-Best Effort",
+                  "value": 3
+                }
+              ]
+            },
+            {
+              "id": "6",
+              "name": "sequencedValue",
+              "title": "Sequenced Value",
+              "ctlType": "TEXTBOX",
+              "dataType": "STRING",
+              "items": [],
+              "isDisabled": false,
+              "extInfo": ""
+            },
+            {
+              "id": "6",
+              "name": "creationDate",
+              "title": "Creation Date",
+              "ctlType": "DATE",
+              "dataType": "STRING",
+              "items": [],
+              "isDisabled": true,
+              "extInfo": ""
+            }
+          ]
+        },
+        {
+          "id": "2",
+          "name": "Other Details",
+          "layoutType": "I",
+          "hideTitle": false,
+          "properties": [
+            {
+              "id": "1",
+              "name": "validFor",
+              "title": "Valid For",
+              "ctlType": "VALID-FOR",
+              "dataType": "STRING",
+              "items": [],
+              "isDisabled": false,
+              "extInfo": ""
+            },
+            {
+              "id": "2",
+              "name": "lifecycleStatus",
+              "title": "Status",
+              "ctlType": "SELECT-LIST",
+              "dataType": "STRING",
+              "items": [],
+              "isDisabled": false,
+              "extInfo": [
+                {
+                  "label": "In study",
+                  "value": "In study"
+                },
+                {
+                  "label": "In design",
+                  "value": "In design"
+                },
+                {
+                  "label": "In test",
+                  "value": "In test"
+                },
+                {
+                  "label": "Active",
+                  "value": "Active"
+                },
+                {
+                  "label": "Launch",
+                  "value": "Launch"
+                },
+                {
+                  "label": "Rejected",
+                  "value": "Rejected"
+                },
+                {
+                  "label": "Retired",
+                  "value": "Retired"
+                },
+                {
+                  "label": "Obsolete",
+                  "value": "Obsolete"
+                }
+              ]
+            },
+            {
+              "id": "3",
+              "name": "version",
+              "title": "Version",
+              "ctlType": "TEXTBOX",
+              "dataType": "NUMBER",
+              "items": [],
+              "isDisabled": false,
+              "extInfo": ""
+            }
+          ]
+        }
+      ],
+      "filter": [],
+      "apiList": [
+        {
+          "id": "",
+          "name": "close",
+          "param": "object",
+          "description": "Cancel"
+        },
+        {
+          "id": "submitAPI",
+          "name": "submitAPI",
+          "uri": "/policyEvent",
+          "param": "object",
+          "description": "Save"
+        }
+      ],
+      "listView": [],
+      "ctlButtons": []
+    },
+    {
+      "id": "2",
+      "code": "Event",
+      "name": "Event",
+      "icon": "pi pi-calendar",
+      "pageType": "SearchBySelectList",
+      "attrName": "policyEvent",
+      "attrType": "policyEvent",
+      "autoCallApi": true,
+      "selectMultiple": false,
+      "filter": [
+        {
+          "name": "name",
+          "title": "Tìm kiếm",
+          "oprType": "like",
+          "dataType": "STRING",
+          "ctlType": "SELECT-LOV",
+          "extInfo": {
+            "uri": "http://10.165.68.7:30216/policyEvent?fields=id,name,@type,@baseType,href,description,version,lifecycleStatus,isBundle,code,isRoot,isLeaf"
+          }
+        }
+      ],
+      "apiListCreate": [
+        {
+          "type": "DELETE",
+          "icon": "pi pi-trash"
+        }
+      ],
+      "listViewCreate": [
+        {
+          "name": "name",
+          "title": "Name",
+          "dataType": "STRING"
+        },
+        {
+          "name": "code",
+          "title": "Code",
+          "dataType": "STRING"
+        }
+      ],
+      "listView": [
+        {
+          "name": "name",
+          "title": "Name",
+          "dataType": "STRING"
+        },
+        {
+          "name": "code",
+          "title": "Code",
+          "dataType": "STRING"
+        }
+      ],
+      "lastModified": {
+        "$date": "2025-09-10T15:20:38.070Z"
+      }
+    },
+    {
+      "id": "3",
+      "code": "Domain",
+      "name": "Domain",
+      "icon": "pi pi-flag",
+      "pageType": "SearchBySelectList",
+      "attrName": "policyDomain",
+      "attrType": "policyDomain",
+      "autoCallApi": true,
+      "filter": [
+        {
+          "name": "name",
+          "title": "Tìm kiếm",
+          "oprType": "like",
+          "dataType": "STRING",
+          "ctlType": "SELECT-LOV",
+          "extInfo": {
+            "uri": "http://10.165.68.7:30216/policyDomain?fields=id,name,@type,@baseType,href,description,version,lifecycleStatus,isBundle,code,isRoot,isLeaf"
+          }
+        }
+      ],
+      "apiListCreate": [
+        {
+          "type": "DELETE",
+          "icon": "pi pi-trash"
+        }
+      ],
+      "listViewCreate": [
+        {
+          "name": "name",
+          "title": "Name",
+          "dataType": "STRING"
+        },
+        {
+          "name": "code",
+          "title": "Code",
+          "dataType": "STRING"
+        }
+      ],
+      "listView": [
+        {
+          "name": "name",
+          "title": "Name",
+          "dataType": "STRING"
+        },
+        {
+          "name": "code",
+          "title": "Code",
+          "dataType": "STRING"
+        }
+      ],
+      "lastModified": {
+        "$date": "2025-09-10T15:20:38.070Z"
+      }
+    },
+    {
+      "id": "4",
+      "code": "Condition",
+      "name": "Condition",
+      "icon": "pi pi-arrow-right-arrow-left",
+      "pageType": "SearchBySelectList",
+      "attrName": "policyCondition",
+      "attrType": "policyCondition",
+      "autoCallApi": true,
+      "selectMultiple": false,
+      "filter": [
+        {
+          "name": "name",
+          "title": "Tìm kiếm",
+          "oprType": "like",
+          "dataType": "STRING",
+          "ctlType": "SELECT-LOV",
+          "extInfo": {
+            "uri": "http://10.165.68.7:30216/policyCondition?fields=id,name,@type,@baseType,href,description,version,lifecycleStatus,isBundle,code,isRoot,isLeaf"
+          }
+        }
+      ],
+      "apiListCreate": [
+        {
+          "type": "DELETE",
+          "icon": "pi pi-trash"
+        }
+      ],
+      "listViewCreate": [
+        {
+          "name": "name",
+          "title": "Name",
+          "dataType": "STRING"
+        },
+        {
+          "name": "code",
+          "title": "Code",
+          "dataType": "STRING"
+        }
+      ],
+      "listView": [
+        {
+          "name": "name",
+          "title": "Name",
+          "dataType": "STRING"
+        },
+        {
+          "name": "code",
+          "title": "Code",
+          "dataType": "STRING"
+        }
+      ],
+      "lastModified": {
+        "$date": "2025-09-10T15:20:38.070Z"
+      }
+    },
+    {
+      "id": "5",
+      "code": "Action",
+      "name": "Action",
+      "icon": "pi pi-angle-double-right",
+      "pageType": "SearchBySelectList",
+      "attrName": "policyAction",
+      "attrType": "policyAction",
+      "autoCallApi": true,
+      "filter": [
+        {
+          "name": "name",
+          "title": "Tìm kiếm",
+          "oprType": "like",
+          "dataType": "STRING",
+          "ctlType": "SELECT-LOV",
+          "extInfo": {
+            "uri": "http://10.165.68.7:30216/policyAction?fields=id,name,@type,@baseType,href,description,version,lifecycleStatus,isBundle,code,isRoot,isLeaf"
+          }
+        }
+      ],
+      "apiListCreate": [
+        {
+          "type": "DELETE",
+          "icon": "pi pi-trash"
+        }
+      ],
+      "listViewCreate": [
+        {
+          "name": "name",
+          "title": "Name",
+          "dataType": "STRING"
+        },
+        {
+          "name": "code",
+          "title": "Code",
+          "dataType": "STRING"
+        }
+      ],
+      "listView": [
+        {
+          "name": "name",
+          "title": "Name",
+          "dataType": "STRING"
+        },
+        {
+          "name": "code",
+          "title": "Code",
+          "dataType": "STRING"
+        }
+      ],
+      "lastModified": {
+        "$date": "2025-09-10T15:20:38.070Z"
+      }
+    }
+  ],
+  "id": "315c95ce-2337-46c4-86b5-05bebf196b5a",
+  "lastModified": {
+    "$date": "2025-09-10T10:41:22.388Z"
+  }
+}

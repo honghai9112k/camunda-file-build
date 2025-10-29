@@ -1,0 +1,909 @@
+{
+  "title": "ProductOfferingPrice",
+  "code": "055",
+  "status": "Active",
+  "formType": "Property",
+  "pages": [
+    {
+      "id": "1",
+      "name": "Product Offering Price",
+      "icon": "pi pi-info-circle",
+      "attrName": "",
+      "attrType": "",
+      "pageType": "Property",
+      "groups": [
+        {
+          "id": "1",
+          "name": "Genaral",
+          "layoutType": "I",
+          "hideTitle": false,
+          "properties": [
+            {
+              "id": "1",
+              "name": "name",
+              "title": "Name",
+              "ctlType": "TEXTBOX",
+              "dataType": "STRING",
+              "items": [],
+              "validateRules": [
+                "REQUIRED"
+              ],
+              "isDisabled": false,
+              "extInfo": ""
+            },
+            {
+              "id": "2",
+              "name": "code",
+              "title": "Code",
+              "ctlType": "TEXTBOX",
+              "dataType": "STRING",
+              "items": [],
+              "validateRules": [
+                "REQUIRED"
+              ],
+              "isDisabled": false,
+              "extInfo": ""
+              },
+              {
+                "id": "3",
+                "name": "description",
+                "title": "Description",
+                "ctlType": "TEXTAREA",
+                "dataType": "STRING",
+                "items": [],
+                "isDisabled": false,
+                "extInfo": "",
+                "display": "column"
+              },
+              {
+                "id": "4",
+                "name": "isTemplate",
+                "title": "Is Template",
+                "ctlType": "SWITCH-BOX",
+                "dataType": "STRING",
+                "items": [],
+                "disabled":false,
+                "extInfo": ""
+              },
+              {
+                "id": "5",
+                "name": "isBundle",
+                "title": "Is Matrix",
+                "ctlType": "SWITCH-BOX",
+                "dataType": "STRING",
+                "items": [],
+                "disabled":true,
+                "extInfo": ""
+              },
+              {
+                "id": "6",
+                "name": "priceType",
+                "title": "Price Type",
+                "dataType": "STRING",
+                "ctlType": "SELECT-LIST",
+                "defaultValue":"onetime",
+                "extInfo": [
+                    {"label":"One Time", "value":"onetime"},
+                    {"label":"Recurring", "value":"recurring"},
+                    {"label":"Usage", "value":"usage"},
+                    {"label":"Discount", "value":"discount"},
+                    {"label":"Replacement", "value":"replacement"}
+                ]
+              },
+              {
+                "id": "7",
+                "name": "priceMode",
+                "title": "Price Mode",
+                "dataType": "STRING",
+                "ctlType": "SELECT-LIST",
+                "defaultValue":"SIMPLE",
+                "showWhen": {
+                  "field": "priceType",
+                  "values": ["onetime","recurring","discount","replacement"]
+                },
+                "extInfo": [
+                    {"label":"SIMPLE", "value":"SIMPLE"}
+                ]
+              },
+            {
+                "id": "8",
+                "name": "priceMode",
+                "title": "Price Mode",
+                "dataType": "STRING",
+                "ctlType": "SELECT-LIST",
+                "defaultValue":"SIMPLE",
+                "showWhen": {
+                  "field": "priceType",
+                  "values": ["usage"]
+                },
+                "extInfo": [
+                    {"label":"GRADUATED", "value":"GRADUATED"},
+                    {"label":"BLOCK", "value":"BLOCK"},
+                    {"label":"OVERAGE", "value":"OVERAGE"}
+                ]
+              },
+              {
+                "id": "9",
+                "code": "priceTier",
+                "name": "priceTier",
+                "title": "Price Tier",
+                "dataType": "STRING",
+                "ctlType": "BUTTON",
+                "showWhen": {
+                  "field": "priceType",
+                  "values": ["usage"]
+                },
+                "extInfo": {
+                  "variant": "text",
+                  "severity": "info",
+                  "align": "right"
+                }
+              },
+              {
+                "id": "10",
+                "code": "unitOfMeasure",
+                "name": "unitOfMeasure",
+                "title": "Unit of Measure",
+                "dataType": "OBJECT",
+                "ctlType": "DYNAMIC-CTLTYPE",
+                "showWhen": {
+                  "field": "priceType",
+                  "values": ["usage"]
+                },
+                "extInfo": [
+                  {
+                    "id": "1",
+                    "code": "amount",
+                    "name": "amount",
+                    "title": "amount",
+                    "placeholder": "amount",
+                    "dataType": "STRING",
+                    "ctlType": "TEXTBOX",
+                    "extInfo": ""
+                  },
+                  {
+                    "id": "2",
+                    "code": "units",
+                    "name": "units",
+                    "title": "units",
+                    "dataType": "STRING",
+                    "ctlType": "TEXTBOX",
+                    "extInfo": ""
+                  }
+                ]
+              },
+              {
+                "id": "11",
+                "code": "2",
+                "name": "period",
+                "title": "Period",
+                "dataType": "OBJECT",
+                "ctlType": "DYNAMIC-CTLTYPE",
+                "showWhen": {
+                  "field": "priceType",
+                  "values": ["recurring"]
+                },
+                "extInfo": [
+                  {
+                    "id": "1",
+                    "code": "1",
+                    "name": "recurringChargePeriodLength",
+                    "title": "recurringChargePeriodLength",
+                    "dataType": "STRING",
+                    "ctlType": "TEXTBOX",
+                    "extInfo": ""
+                  },
+                  {
+                    "id": "2",
+                    "code": "2",
+                    "name": "recurringChargePeriodType",
+                    "title": "recurringChargePeriodType",
+                    "dataType": "STRING",
+                    "ctlType": "SELECT-LIST",
+                    "defaultValue":"vnd",
+                    "extInfo": [
+                      {
+                        "label": "Hourly",
+                        "value": "hourly"
+                      },
+                      {
+                        "label": "Daily",
+                        "value": "daily"
+                      },
+                      {
+                        "label": "Weekly",
+                        "value": "weekly"
+                      },
+                      {
+                        "label": "Monthly",
+                        "value": "monthly"
+                      },
+                      {
+                        "label": "Yearly",
+                        "value": "yearly"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "12",
+                "code": "2",
+                "name": "price",
+                "title": "Price",
+                "dataType": "OBJECT",
+                "ctlType": "DYNAMIC-CTLTYPE",
+                "validateRules": [
+                  "REQUIRED"
+                ],
+                "showWhen": {
+                  "field": "priceType",
+                  "values": ["onetime","recurring","usage","replacement"]
+                },
+                "extInfo": [
+                  {
+                    "id": "1",
+                    "code": "1",
+                    "name": "value",
+                    "title": "value",
+                    "dataType": "STRING",
+                    "ctlType": "TEXTBOX",
+                    "extInfo": ""
+                  },
+                  {
+                    "id": "2",
+                    "code": "2",
+                    "name": "unit",
+                    "title": "unit",
+                    "dataType": "STRING",
+                    "ctlType": "SELECT-LIST",
+                    "defaultValue":"vnd",
+                    "extInfo": [
+                      {
+                        "label": "VND",
+                        "value": "vnd"
+                      },
+                      {
+                        "label": "USD",
+                        "value": "usd"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "13",
+                "name": "percentage",
+                "title": "Percentage",
+                "ctlType": "TEXTBOX",
+                "dataType": "STRING",
+                "items": [],
+                "disabled":false,
+                "extInfo": "",
+                "validateRules": [
+                  "REQUIRED"
+                ],
+                "showWhen": {
+                  "field": "priceType",
+                  "values": ["discount"]
+                }
+              }
+          ]
+        },
+        {
+          "id": "2",
+          "name": "Other",
+          "layoutType": "I",
+           "hideTitle": false,
+          "properties": [
+            {
+              "id": "1",
+              "name": "validFor",
+              "title": "ValidFor",
+              "ctlType": "VALID-FOR",
+              "dataType": "OBJECT",
+              "items": [],
+              "isDisabled": false,
+              "extInfo": ""
+            },
+             {
+                "id": "2",
+                "name": "lifecycleStatus",
+                "title": "Status",
+                "dataType": "STRING",
+                "ctlType": "SELECT-LIST",
+                "extInfo": [
+                    {"label":"In study", "value":"In study"},
+                    {"label":"In design", "value":"In design"},
+                    {"label":"In test", "value":"In test"},
+                    {"label":"Active", "value":"Active"},
+                    {"label":"Launch", "value":"Launch"},
+                    {"label":"Rejected", "value":"Rejected"},
+                    {"label":"In study", "value":"In study"},
+                    {"label":"Retired", "value":"Retired"}
+                ]
+            }, 
+             {
+              "id": "3",
+              "name": "version",
+              "title": "Version",
+              "ctlType": "TEXTBOX",
+              "dataType": "STRING",
+              "items": [],
+              "extInfo": ""
+              }
+          ]
+        }
+      ],
+      "filter": [],
+      "apiList": [
+        {
+          "id": "",
+          "name": "close",
+          "param": "object",
+          "description": "Close"
+        },
+        {
+          "id": "submit",
+          "name": "submit",
+          "param": "object",
+          "description": "Lưu"
+        }
+      ],
+      "listView": [],
+      "ctlButtons": []
+    },
+    {
+      "id": "7b7b6007-3464-4ddd-83cd-4c9c741844e7",
+      "code": "Attribute",
+      "name": "Characteristic Use",
+      "icon": "pi pi-chart-pie",
+      "pageType": "SearchBySelectList",
+      "attrName": "attribute",
+      "attrType": "attribute",
+      "filter": [
+        {
+          "name": "name",
+          "title": "Tìm kiếm",
+          "oprType": "like",
+          "dataType": "STRING",
+          "ctlType": "SELECT-LOV",
+          "extInfo": {
+            "uri": "http://10.165.68.7:30216/characteristicCategory?&domain=epc&filter=%24%5B%3F(%40.isLeaf%3D%3Dtrue)%5D&",
+            "labelField": "name",
+            "onChange": {
+              "uri": "http://10.165.68.7:30216/characteristicCategory/{value}",
+              "method": "GET",
+              "mapping": {
+                "value": "id"
+              },
+              "responseMapping": {
+                "labelField": "name",
+                "valueField": "characteristicSpecification"
+              }
+            }
+          }
+        }
+      ],
+      "apiList": [],
+      "apiListCreate": [
+        {
+          "type": "UPDATE",
+          "icon": "pi pi-eye"
+        },
+        {
+          "type": "DELETE",
+          "icon": "pi pi-trash"
+        }
+      ],
+      "listViewCreate": [
+        {
+          "name": "name",
+          "title": "Name",
+          "dataType": "STRING"
+        },
+        {
+          "name": "code",
+          "title": "Code",
+          "dataType": "STRING"
+        }
+      ],
+      "listView": [
+        {
+          "name": "layout.title",
+          "title": "Title",
+          "dataType": "STRING"
+        },
+        {
+          "name": "idx",
+          "whenNull": "code",
+          "title": "Idx",
+          "dataType": "STRING"
+        }
+      ],
+      "crudConfig": {
+      },
+      "lastModified": {
+        "$date": "2025-09-10T15:20:38.070Z"
+      }
+    },
+    {
+      "id": "3",
+      "name": "Tax",
+      "icon": "pi pi-list",
+      "attrName": "tax",
+      "attrType": "",
+      "pageType": "EPC",
+      "groups": [],
+      "filter": [
+        {
+          "name": "name",
+          "title": "Tìm kiếm",
+          "oprType": "like",
+          "dataType": "STRING",
+          "ctlType": "TEXTBOX"
+        }
+      ],
+      "apiList": [],
+      "listView": [
+        {
+          "name": "taxCategory",
+          "title": "Category",
+          "dataType": "STRING"
+        },
+        {
+          "name": "taxAmount.value",
+          "title": "Amount",
+          "dataType": "STRING"
+        }
+      ],
+      "ctlButtons": [],
+      "crudConfig": {
+        "addConfig": {
+          "title": "",
+          "id": "Tax",
+          "code": "attributes",
+          "formType": "Property",
+          "status": "ACTIVE",
+          "hiddenTab": true,
+          "pages": [
+            {
+              "id": "1",
+              "code": "",
+              "name": "",
+              "icon": "pi pi-file",
+              "pageType": "Property",
+              "attrName": "",
+              "attrType": "",
+              "groups": [
+                {
+                  "id": "1",
+                  "code": "General",
+                  "name": "General",
+                  "layoutType": "I",
+                  "hideTitle": true,
+                  "properties": [
+                    {
+                      "id": "1",
+                      "name": "taxCategory",
+                      "title": "Tax Category",
+                      "dataType": "STRING",
+                      "ctlType": "SELECT-LIST",
+                      "validateRules": [
+                        "REQUIRED"
+                      ],
+                      "extInfo": [
+                        {
+                          "label": "VAT",
+                          "value": "VAT"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "2",
+                      "name": "taxRate",
+                      "title": "Tax Rate",
+                      "dataType": "STRING",
+                      "ctlType": "TEXTBOX",
+                      "extInfo": ""
+                    },
+                    {
+                      "id": "3",
+                      "code": "taxAmount",
+                      "name": "taxAmount",
+                      "title": "Tax Amount",
+                      "dataType": "OBJECT",
+                      "ctlType": "DYNAMIC-CTLTYPE",
+                      "extInfo": [
+                        {
+                          "id": "1",
+                          "code": "1",
+                          "name": "value",
+                          "title": "value",
+                          "dataType": "STRING",
+                          "ctlType": "TEXTBOX",
+                          "extInfo": ""
+                        },
+                        {
+                          "id": "2",
+                          "code": "2",
+                          "name": "unit",
+                          "title": "unit",
+                          "dataType": "STRING",
+                          "ctlType": "SELECT-LIST",
+                          "defaultValue":"vnd",
+                          "extInfo": [
+                            {
+                              "label": "VND",
+                              "value": "vnd"
+                            },
+                            {
+                              "label": "USD",
+                              "value": "usd"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "apiList": []
+            }
+          ]
+        },
+        "editConfig": {
+          "title": "",
+          "id": "CharacteristicSpecification",
+          "code": "attributes",
+          "formType": "Property",
+          "status": "ACTIVE",
+          "hiddenTab": true,
+          "pages": [
+            {
+              "id": "1",
+              "code": "",
+              "name": "",
+              "icon": "pi pi-file",
+              "pageType": "Property",
+              "attrName": "",
+              "attrType": "",
+              "groups": [
+                {
+                  "id": "1",
+                  "code": "General",
+                  "name": "General",
+                  "layoutType": "I",
+                  "hideTitle": true,
+                  "properties": [
+                    {
+                      "id": "1",
+                      "name": "taxCategory",
+                      "title": "Tax Category",
+                      "dataType": "STRING",
+                      "ctlType": "SELECT-LIST",
+                      "validateRules": [
+                        "REQUIRED"
+                      ],
+                      "extInfo": [
+                        {
+                          "label": "VAT",
+                          "value": "VAT"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "2",
+                      "name": "taxRate",
+                      "title": "Tax Rate",
+                      "dataType": "STRING",
+                      "ctlType": "TEXTBOX",
+                      "extInfo": ""
+                    },
+                    {
+                      "id": "3",
+                      "name": "taxAmount.value",
+                      "title": "Tax Amount",
+                      "dataType": "STRING",
+                      "ctlType": "TEXTBOX",
+                      "extInfo": ""
+                    }
+                  ]
+                }
+              ],
+              "apiList": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "4",
+      "code": "Relationship",
+      "name": "Relationship",
+      "icon": "pi pi-flag",
+      "pageType": "SearchBySelectList",
+      "attrName": "relationship",
+      "attrType": "relationship",
+      "autoCallApi": true,
+      "filter": [
+        {
+          "name": "name",
+          "title": "Tìm kiếm",
+          "oprType": "like",
+          "dataType": "STRING",
+          "ctlType": "SELECT-LOV",
+          "extInfo": {
+            "uri": "http://10.165.68.7:30216/productOfferingPrice?fields=id,name,@type,@baseType,href,description,version,lifecycleStatus,isBundle,code,isRoot,isLeaf,priceType&@type=ProductOfferingPrice&id.neq=6891ed2bb7f1651643e6119e"
+          }
+        }
+      ],
+      "apiListCreate": [
+        {
+          "type": "DELETE",
+          "icon": "pi pi-trash"
+        }
+      ],
+      "listViewCreate": [
+        {
+          "name": "name",
+          "title": "Name",
+          "dataType": "STRING"
+        },
+        {
+          "name": "priceType",
+          "title": "Price Type",
+          "dataType": "STRING"
+        }
+      ],
+      "listView": [
+        {
+          "name": "name",
+          "title": "Name",
+          "dataType": "STRING"
+        },
+        {
+          "name": "priceType",
+          "title": "Price Type",
+          "dataType": "STRING"
+        }
+      ],
+      "lastModified": {
+        "$date": "2025-09-10T15:20:38.070Z"
+      }
+    },
+    {
+      "id": "5",
+      "name": "Terms",
+      "icon": "pi pi-calendar",
+      "attrName": "productOfferingTerm",
+      "attrType": "",
+      "pageType": "EPC",
+      "groups": [],
+      "filter": [
+        {
+          "name": "name",
+          "title": "Tìm kiếm",
+          "oprType": "like",
+          "dataType": "STRING",
+          "ctlType": "TEXTBOX"
+        }
+      ],
+      "apiList": [],
+      "listView": [
+        {
+          "name": "name",
+          "title": "Name",
+          "dataType": "STRING"
+        },
+        {
+          "name": "taxAmount.value",
+          "title": "Duration",
+          "dataType": "STRING"
+        }
+      ],
+      "ctlButtons": [],
+      "crudConfig": {
+        "addConfig": {
+          "title": "",
+          "id": "ProductOfferingTerm",
+          "code": "productOfferingTerm",
+          "formType": "Property",
+          "status": "ACTIVE",
+          "hiddenTab": true,
+          "pages": [
+            {
+              "id": "1",
+              "code": "",
+              "name": "",
+              "icon": "pi pi-file",
+              "pageType": "Property",
+              "attrName": "",
+              "attrType": "",
+              "groups": [
+                {
+                  "id": "1",
+                  "code": "General",
+                  "name": "General",
+                  "layoutType": "I",
+                  "hideTitle": true,
+                  "properties": [
+                    {
+                      "id": "1",
+                      "name": "name",
+                      "title": "Name",
+                      "dataType": "STRING",
+                      "ctlType": "TEXTBOX",
+                      "extInfo": "",
+                      "validateRules": [
+                        "REQUIRED"
+                      ]
+                    },
+                    {
+                      "id": "2",
+                      "name": "description",
+                      "title": "Description",
+                      "ctlType": "TEXTAREA",
+                      "dataType": "STRING",
+                      "items": [],
+                      "isDisabled": false,
+                      "extInfo": ""
+                    },
+                    {
+                      "id": "3",
+                      "name": "duration",
+                      "title": "Duration",
+                      "dataType": "STRING",
+                      "ctlType": "TEXTBOX",
+                      "extInfo": ""
+                    },
+                    {
+                      "id": "4",
+                      "name": "validFor",
+                      "title": "Valid For",
+                      "ctlType": "VALID-FOR",
+                      "dataType": "STRING",
+                      "items": [],
+                      "isDisabled": false,
+                      "extInfo": ""
+                    }
+                  ]
+                }
+              ],
+              "apiList": []
+            }
+          ]
+        },
+        "editConfig": {
+          "title": "",
+          "id": "CharacteristicSpecification",
+          "code": "attributes",
+          "formType": "Property",
+          "status": "ACTIVE",
+          "hiddenTab": true,
+          "pages": [
+            {
+              "id": "1",
+              "code": "",
+              "name": "",
+              "icon": "pi pi-file",
+              "pageType": "Property",
+              "attrName": "",
+              "attrType": "",
+              "groups": [
+                {
+                  "id": "1",
+                  "code": "General",
+                  "name": "General",
+                  "layoutType": "I",
+                  "hideTitle": true,
+                  "properties": [
+                    {
+                      "id": "1",
+                      "name": "name",
+                      "title": "Name",
+                      "dataType": "STRING",
+                      "ctlType": "TEXTBOX",
+                      "extInfo": "",
+                      "validateRules": [
+                        "REQUIRED"
+                      ]
+                    },
+                    {
+                      "id": "2",
+                      "name": "description",
+                      "title": "Description",
+                      "ctlType": "TEXTAREA",
+                      "dataType": "STRING",
+                      "items": [],
+                      "isDisabled": false,
+                      "extInfo": ""
+                    },
+                    {
+                      "id": "3",
+                      "name": "duration",
+                      "title": "Duration",
+                      "dataType": "STRING",
+                      "ctlType": "TEXTBOX",
+                      "extInfo": ""
+                    },
+                    {
+                      "id": "4",
+                      "name": "validFor",
+                      "title": "Valid For",
+                      "ctlType": "VALID-FOR",
+                      "dataType": "STRING",
+                      "items": [],
+                      "isDisabled": false,
+                      "extInfo": ""
+                    }
+                  ]
+                }
+              ],
+              "apiList": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "6",
+      "code": "Action",
+      "name": "Action",
+      "icon": "pi pi-angle-double-right",
+      "pageType": "SearchBySelectList",
+      "attrName": "policyAction",
+      "attrType": "policyAction",
+      "autoCallApi": true,
+      "filter": [
+        {
+          "name": "name",
+          "title": "Tìm kiếm",
+          "oprType": "like",
+          "dataType": "STRING",
+          "ctlType": "SELECT-LOV",
+          "extInfo": {
+            "uri": "http://10.165.68.7:30216/policyAction?fields=id,name,@type,@baseType,href,description,version,lifecycleStatus,isBundle,code,isRoot,isLeaf"
+          }
+        }
+      ],
+      "apiListCreate": [
+        {
+          "type": "DELETE",
+          "icon": "pi pi-trash"
+        }
+      ],
+      "listViewCreate": [
+        {
+          "name": "name",
+          "title": "Name",
+          "dataType": "STRING"
+        },
+        {
+          "name": "code",
+          "title": "Code",
+          "dataType": "STRING"
+        }
+      ],
+      "listView": [
+        {
+          "name": "name",
+          "title": "Name",
+          "dataType": "STRING"
+        },
+        {
+          "name": "code",
+          "title": "Code",
+          "dataType": "STRING"
+        }
+      ],
+      "lastModified": {
+        "$date": "2025-09-10T15:20:38.070Z"
+      }
+    }
+  ],
+  "id": "315c95ce-2337-46c4-86b5-05bebf196b5a",
+  "lastModified": {
+    "$date": "2025-09-10T10:41:22.388Z"
+  }
+}
